@@ -1,0 +1,72 @@
+      PROGRAM UNIVERSE.QUICK.EXER
+      PROGRAM.NAME = "UNIVERSE.QUICK.EXER"
+
+
+************
+* INCLUDES *
+************
+
+      INCLUDE INCLUDES EQU.BRN.DETAIL.DIM
+      INCLUDE INCLUDES EQU.DW.USER.DEFS.DIM
+
+**************
+* FILE OPENS *
+**************
+
+      ACCOUNT.NAME = OCONV(@WHO,'MCU')
+      ERR = ''
+
+      INCLUDE INCLUDES OPEN.FILE.BRN.DETAIL
+      INCLUDE INCLUDES OPEN.FILE.USER.DEFS
+
+      IF ERR NE '' THEN
+         FATAL.ERROR.MSG = "CANNOT OPEN FILES ":ERR
+         PRINT FATAL.ERROR.MSG
+         STOP
+      END
+
+*************
+* MAIN PROG *
+*************
+      TOTAL.BRANCHES = 0
+      BRNSELECT = 'SELECT BRN-DETAIL'
+
+      PERFORM BRNSELECT RTNLIST BRN.LIST CAPTURING OUTPUT
+      LOOP WHILE READNEXT BRN.CODE FROM BRN.LIST DO
+         MATREAD BRN.DETAIL.REC FROM BRN.DETAIL.FV, BRN.CODE THEN
+            IF BRN.TYPE = "A" AND BRN.ACTIVE = "Y" AND BRN.TRADING = "Y" AND BRN.INC.ON.INTERNET = "Y" AND BRN.BRAND[2,1] ="T" THEN
+               TOTAL.BRANCHES += 1
+
+               BEGIN CASE
+                  CASE BRN.CODE = ""
+                     BRN.CODE = "UNKNOWN"
+                  CASE BRN.DESC = ""
+                     BRN.DESC = "UNKNOWN"
+                  CASE BRN.MAN.USER.ID = ""
+                     BRN.MAN.USER.ID = "UNKNOWN"
+                  CASE USER.DEFS.REC<1> = ""
+                     USER.DEFS.REC<1> = "UNKNOWN"
+               END CASE
+
+               PRINT
+               PRINT "BRANCH CODE: " : BRN.CODE
+               PRINT "BRANCH NAME: " : BRN.DESC
+               VALUEMCOUNT = DCOUNT(BRN.MAN.USER.ID, @VM)
+               FOR VM = 1 TO VALUEMCOUNT
+                  USER.ID = BRN.MAN.USER.ID<1,VM>
+                  PRINT "BRANCH MANAGER USER ID: " : USER.ID
+                  READ USER.DEFS.REC FROM USER.DEFS.FV, USER.ID THEN
+                     PRINT "BRANCH MANAGER FULL NAME: " : USER.DEFS.REC<1>
+                  END ELSE
+                     PRINT "BRANCH MANAGER FULL NAME: UNKNOWN"
+                  END
+               NEXT VM
+            END
+         END
+      REPEAT
+      PRINT
+      PRINT "TOTAL NUMBER OF BRANCHES = " : TOTAL.BRANCHES
+
+*********************************************************************
+   END
+*********************************************************************
