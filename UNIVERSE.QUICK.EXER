@@ -37,16 +37,15 @@
             IF BRN.TYPE = "A" AND BRN.ACTIVE = "Y" AND BRN.TRADING = "Y" AND BRN.INC.ON.INTERNET = "Y" AND BRN.BRAND[2,1] ="T" THEN
                TOTAL.BRANCHES += 1
 
-               BEGIN CASE
-                  CASE BRN.CODE = ""
-                     BRN.CODE = "UNKNOWN"
-                  CASE BRN.DESC = ""
-                     BRN.DESC = "UNKNOWN"
-                  CASE BRN.MAN.USER.ID = ""
-                     BRN.MAN.USER.ID = "UNKNOWN"
-                  CASE USER.DEFS.REC<1> = ""
-                     USER.DEFS.REC<1> = "UNKNOWN"
-               END CASE
+               IF BRN.CODE = "" THEN
+                  BRN.CODE = "UNKNOWN"
+               END ELSE IF BRN.DESC = "" THEN
+                  BRN.DESC = "UNKNOWN"
+               END ELSE IF BRN.MAN.USER.ID = "" THEN
+                  BRN.MAN.USER.ID = "UNKNOWN"
+               END ELSE IF USER.DEFS.REC<1> = "" THEN
+                  USER.DEFS.REC<1> = "UNKNOWN"
+               END
 
                PRINT
                PRINT "BRANCH CODE: " : BRN.CODE
